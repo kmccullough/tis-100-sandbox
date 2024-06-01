@@ -1,0 +1,83 @@
+:root {
+  --text-color: #cfcfcf;
+  --label-color: #999;
+}
+
+body {
+  background-color: #000;
+  color: var(--text-color);
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 12px;
+  line-height: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.node {
+  display: grid;
+  padding: 2px;
+  grid-template:
+    'code acc'
+    'code bak'
+    'code last'
+    'code mode'
+    'code idle'
+  ;
+  grid-template-columns: auto 7ch;
+  gap: 2px;
+}
+
+.node,
+.node-code,
+.node-acc,
+.node-bak,
+.node-last,
+.node-mode,
+.node-idle {
+  border: 1px solid #fff;
+}
+
+.node-code,
+.node-acc,
+.node-bak,
+.node-last,
+.node-mode,
+.node-idle {
+  padding: .5ch;
+}
+
+.node-acc,
+.node-bak,
+.node-last,
+.node-mode,
+.node-idle {
+  text-align: center;
+}
+
+.node-code {
+  grid-area: code;
+}
+
+.node-acc {
+  grid-area: acc;
+}
+
+.node-bak {
+  grid-area: bak;
+}
+
+.node-last {
+  grid-area: last;
+}
+
+.node-mode {
+  grid-area: mode;
+}
+
+.node-idle {
+  grid-area: idle;
+}
+
+.node-label {
+  color: var(--label-color);
+}
