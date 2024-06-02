@@ -1,10 +1,17 @@
 :root {
+  --background-color: #000;
   --text-color: #cfcfcf;
   --label-color: #999;
+  --text-padding: 1ch;
 }
 
 body {
-  background-color: #000;
+
+}
+
+body,
+.node-editor {
+  background-color: var(--background-color);
   color: var(--text-color);
   font-family: "Consolas", "Courier New", monospace;
   font-size: 12px;
@@ -23,7 +30,7 @@ body {
     'code mode'
     'code idle'
   ;
-  grid-template-columns: auto 7ch;
+  grid-template-columns: auto 6ch;
   gap: 2px;
 }
 
@@ -43,7 +50,7 @@ body {
 .node-last,
 .node-mode,
 .node-idle {
-  padding: .5ch;
+  padding: var(--text-padding);
 }
 
 .node-acc,
@@ -56,6 +63,8 @@ body {
 
 .node-code {
   grid-area: code;
+  position: relative;
+  padding: 0;
 }
 
 .node-acc {
@@ -80,4 +89,12 @@ body {
 
 .node-label {
   color: var(--label-color);
+}
+
+.node-editor {
+  resize: none;
+  position: absolute;
+  inset: 0;
+  outline: none;
+  padding: var(--text-padding);
 }
