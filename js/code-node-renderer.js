@@ -1,6 +1,6 @@
 const formatNoop = () => {};
-const formatCode = el => value => {
-  el.innerText = value;
+const formatCode = (el, codeAstRenderer) => codeAst => {
+  el.innerHTML = codeAstRenderer.render(codeAst);
 };
 const formatNumber = el => value => {
   el.innerText = value;
@@ -21,23 +21,24 @@ const formatPercent = el => value => {
 class CodeNodeRenderer {
   renderState;
 
-  constructor(renderState) {
+  constructor(renderState, codeAstRenderer) {
     this.renderState = renderState;
+    this.codeAstRenderer = codeAstRenderer;
   }
 
   createElements(codeNode) {
     if (codeNode.elements) {
       return;
     }
-    const editor = createElement('textarea', {
+    const editor = createElement({
       class: 'node-editor',
       attributes: {
+        contenteditable: true,
         autocomplete: 'off',
         autocapitalize: 'off',
         spellcheck: false,
       },
-      innerText: 'MOV UP DOWN',
-    })
+    });
     const code = createElement({
       class: 'node-code',
       append: editor,
@@ -93,7 +94,7 @@ class CodeNodeRenderer {
     node.append(code, accLabel, bakLabel, lastLabel, modeLabel, idleLabel);
     codeNode.elements = {
       node:   { element: node,   setValue: formatNoop         },
-      code:   { element: editor, setValue: formatCode(editor) },
+      code:   { element: editor, setValue: formatCode(editor, this.codeAstRenderer) },
       acc:    { element: acc,    setValue: formatNumber(acc)  },
       bak:    { element: bak,    setValue: formatBak(bak)     },
       last:   { element: last,   setValue: formatNumber(last) },

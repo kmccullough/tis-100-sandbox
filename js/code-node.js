@@ -20,6 +20,7 @@ class CodeNode {
 
   setValue(key, value) {
     this.renderer?.setValue(this, key, value);
+    return this;
   }
 
   render() {

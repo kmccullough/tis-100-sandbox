@@ -3,6 +3,8 @@
   --text-color: #cfcfcf;
   --label-color: #999;
   --text-padding: 1ch;
+  --error-underline-height: 3px;
+  --error-underline-color: #a00;
 }
 
 body {
@@ -97,4 +99,9 @@ body,
   inset: 0;
   outline: none;
   padding: var(--text-padding);
+  line-height: calc(1em + var(--error-underline-height));
+}
+
+.error {
+  text-decoration: underline var(--error-underline-height) var(--error-underline-color);
 }
