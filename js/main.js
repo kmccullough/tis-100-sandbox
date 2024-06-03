@@ -1,10 +1,10 @@
 const nodes = [];
 const renderState = new RenderState();
-const codeAstRenderer = new CodeAstRenderer(renderState);
+const codeAstRenderer = new CodeInstructionsRenderer(renderState);
 const codeNodeRenderer = new CodeNodeRenderer(renderState,  codeAstRenderer);
 
 addEventListener('DOMContentLoaded', () => {
-  const codeAst = new CodeAst('MOV UP DOWN1\nMOV DOWN UP');
+  const codeAst = new CodeInstructions('MOV UP DOWN1\nLABEL:MOV DOWN UP');
   const codeNode = new CodeNode(codeNodeRenderer)
     .setPosition({ x: 0, y: 0 })
     .setValue('code', codeAst)
