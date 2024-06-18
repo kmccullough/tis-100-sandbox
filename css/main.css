@@ -1,7 +1,12 @@
 :root {
   --background-color: #000;
-  --text-color: #cfcfcf;
-  --label-color: #999;
+  --main-color: #a9b7c6; /* #cfcfcf */
+  --heading-color: #77B767; /* #8997a6 */
+  --label-color: #fff;
+  --op-color: #ffc66d;
+  --var-color: #9876aa;
+  --comment-color: #629755;
+  --border-color: var(--main-color); /* #999 */
   --text-padding: 1ch;
   --error-underline-height: 3px;
   --error-underline-color: #a00;
@@ -14,7 +19,7 @@ body {
 body,
 .node-editor {
   background-color: var(--background-color);
-  color: var(--text-color);
+  color: var(--main-color);
   font-family: "Consolas", "Courier New", monospace;
   font-size: 12px;
   line-height: 12px;
@@ -43,7 +48,7 @@ body,
 .node-last,
 .node-mode,
 .node-idle {
-  border: 1px solid #fff;
+  border: 1px solid var(--border-color);
 }
 
 .node-code,
@@ -89,8 +94,8 @@ body,
   grid-area: idle;
 }
 
-.node-label {
-  color: var(--label-color);
+.node-heading {
+  color: var(--heading-color);
 }
 
 .node-editor {
@@ -102,6 +107,22 @@ body,
   line-height: calc(1em + var(--error-underline-height));
 }
 
-.error {
+.code-error {
   text-decoration: underline var(--error-underline-height) var(--error-underline-color);
+}
+
+.code-op {
+  color: var(--op-color);
+}
+
+.code-label {
+  color: var(--label-color);
+}
+
+.code-var {
+  color: var(--var-color);
+}
+
+.code-comment {
+  color: var(--comment-color);
 }

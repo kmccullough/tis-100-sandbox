@@ -1,13 +1,18 @@
-const nodes = [];
+import { CodeInstructions } from './code-instructions.js';
+import { CodeInstructionsRenderer } from './code-instructions-renderer.js';
+import { CodeNode } from './code-node.js';
+import { CodeNodeRenderer } from './code-node-renderer.js';
+import { RenderState } from './render-state.js';
+
 const renderState = new RenderState();
-const codeAstRenderer = new CodeInstructionsRenderer(renderState);
-const codeNodeRenderer = new CodeNodeRenderer(renderState,  codeAstRenderer);
+const codeInstructionsRenderer = new CodeInstructionsRenderer(renderState);
+const codeNodeRenderer = new CodeNodeRenderer(renderState,  codeInstructionsRenderer);
 
 addEventListener('DOMContentLoaded', () => {
-  const codeAst = new CodeInstructions('MOV UP DOWN1\nLABEL:MOV DOWN UP');
+  const instructions = new CodeInstructions('MOV UP DOWN1\nLABEL:MOV DOWN UP');
   const codeNode = new CodeNode(codeNodeRenderer)
     .setPosition({ x: 0, y: 0 })
-    .setValue('code', codeAst)
+    .setValue('code', instructions)
   ;
   let toggle = 0;
   setInterval(() => {

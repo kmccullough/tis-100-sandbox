@@ -1,3 +1,3 @@
-class RenderState {
+export class RenderState {
 
 }

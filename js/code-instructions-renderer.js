@@ -1,12 +1,39 @@
-const errorStart = '<span class="error">';
-const errorEnd = '</span>';
-const error = code => `${errorStart}${code}${errorEnd}`;
+const wrap = (code, type = null) => {
+  const el = type ? document.createElement('span') : document.createTextNode(code);
+  if (type) {
+    el.className = `code-${type}`;
+    if (typeof code === 'string') {
+      el.innerText = code;
+    } else {
+      el.append(code);
+    }
+  }
+  return el;
+};
+const wrapError = code => wrap(code, 'error');
+const wrapLabel = code => wrap(code, 'label');
+const wrapOp = code => wrap(code, 'op');
+const wrapVar = code => wrap(code, 'var');
+const wrapConst = code => wrap(code, 'const')
+const wrapComment = code => wrap(code, 'comment');
 
-const matchInstruction = /^([a-z]+:\s*)?([a-z0-9]+)([^a-z0-9].*)$/;
-const matchOperands = /^(\s+|,)([a-z0-9]+)([^a-z0-9].*)?$/;
+const matchInstruction = /^(\s*)(?:([a-z][a-z0-9]*):)?(\s*)([a-z0-9]+)([^a-z0-9].*)?$/i;
+const matchOperands = /(\s+|\s*,\s*)([a-z0-9]+)/gi;
+const matchComment = /^(.*)(#.*)?$/;
+const matchVar = /[a-z_][a-z0-9_]+/i;
 
-class CodeInstructionsRenderer {
+const SELECTION_KEYS = [
+  { instruction: 'selectionStart', container: '_startContainer', offset: '_startOffset' },
+  { instruction: 'selectionEnd', container: '_endContainer', offset: '_endOffset' },
+];
+
+export class CodeInstructionsRenderer {
   renderState;
+
+  _startContainer;
+  _startOffset;
+  _endContainer;
+  _endOffset;
 
   constructor(renderState) {
     this.renderState = renderState;
@@ -16,53 +43,115 @@ class CodeInstructionsRenderer {
     if (!codeInstructions) {
       return;
     }
-    const instructions = [];
+    const nodes = [];
     let hasError = false;
+    this._startContainer = this._endContainer = null;
     for (const instruction of codeInstructions.instructions) {
-      instructions[instructions.length] = this.renderInstruction(instruction, !hasError);
+      if (nodes.length) {
+        nodes[nodes.length] = document.createElement('br');
+      }
+      nodes[nodes.length] = this.renderInstruction(instruction, !hasError);
       hasError ||= !!instruction.error;
     }
-    return instructions.join('<br>');
+    return {
+      startContainer: this._startContainer,
+      startOffset: this._startContainer && this._startOffset,
+      endContainer: this._endContainer,
+      endOffset: this._endContainer && this._endOffset,
+      nodes,
+    };
   }
 
   renderInstruction(instruction, displayError) {
-    if (!displayError || !instruction.error) {
-      return instruction.source;
-    }
-    let code = instruction.source.toLowerCase();
-    if (instruction.errorIndex === 0) {
-      return error(code);
-    }
-    if (instruction.errorIndex === 1) {
-      const match = code.match(matchInstruction);
-      if (match) {
-        const [ , label = '', op, rest ] = match;
-        return label + error(op) + rest;
-      }
-      return code;
-    }
-    const index = [].concat(instruction.errorIndex);
-    const match = code.match(matchInstruction);
-    if (match) {
-      let [ , label = '', op, rest ] = match;
-      code = label + op;
-      let matchOps, operand, isErrorSet, delimiter, i = 2;
-      while (rest && i <= (index[1] ?? index[0]) && (matchOps = rest.match(matchOperands))) {
-        [ , delimiter, operand, rest ] = matchOps;
-        code += delimiter;
-        if (i++ >= index[0] && !isErrorSet) {
-          code += errorStart;
-          isErrorSet = true;
+    let { source } = instruction;
+    let node = document.createElement('span');
+    node.className = 'code-line';
+
+    const setSelection = (position, length, container) => {
+      for (const keys of SELECTION_KEYS) {
+        const cont = this[keys.container];
+        const selection = instruction[keys.instruction] ?? -1;
+        if (!cont
+          && selection >= position
+          && selection <= position + length
+        ) {
+          this[keys.container] = container;
+          this[keys.offset] = selection - position;
         }
-        code += operand;
       }
-      if (isErrorSet) {
-        code += errorEnd + (rest || '');
-      }
-    }
+    };
+
     if (instruction.error) {
+      // TODO output error above node
       console.log(instruction.error);
     }
-    return code;
+
+    let index = 0;
+    let match = source.match(matchInstruction);
+    if (!match) {
+      return node;
+    }
+    let [ , preLabel = '', label = '', postLabel = '', op, rest = '' ] = match;
+
+    if (preLabel) {
+      const preLabelEl = wrap(preLabel);
+      node.append(preLabelEl);
+      setSelection(index, preLabel.length, preLabelEl);
+      index += preLabel.length;
+    }
+    if (label) {
+      const labelEl = wrapLabel(label);
+      const delEl = wrap(':');
+      node.append(labelEl, delEl);
+      setSelection(index, label.length, labelEl.firstChild);
+      index += label.length;
+      setSelection(index, 1, delEl);
+      index += 1;
+    }
+    if (postLabel) {
+      const postLabelEl = wrap(postLabel);
+      node.append(postLabelEl);
+      setSelection(index, postLabel.length, postLabelEl);
+      index += preLabel.length;
+    }
+
+    let opEl = wrapOp(op);
+
+    // Error on op-code
+    if (displayError && instruction.errorIndex === 1) {
+      opEl = wrapError(opEl);
+      setSelection(index, op.length, opEl.firstChild);
+      index += op.length;
+    }
+
+    node.append(opEl);
+
+    match = rest.match(matchComment);
+    let comment;
+    [ rest = '', comment = '' ] = match;
+
+    const operands = [ ...rest.matchAll(matchOperands) ];
+
+    let operandIndex = 2;
+    for (const [ , delimiter, operand ] of operands) {
+      const delEl = wrap(delimiter);
+      setSelection(index, delimiter.length, delEl.firstChild);
+      index += delimiter.length;
+      let operandEl = matchVar.test(operand) ? wrapVar(operand) : wrapConst(operand);
+      setSelection(index, operand.length, operandEl.firstChild);
+      index += operand.length;
+      if (displayError && instruction.errorIndex === operandIndex) {
+        operandEl = wrapError(operandEl);
+      }
+      node.append(delEl, operandEl);
+      ++operandIndex;
+    }
+
+    // Error on full line
+    if (instruction.errorIndex === 0) {
+      node = wrapError(node);
+    }
+
+    return node;
   }
 }
