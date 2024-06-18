@@ -1,6 +1,8 @@
 :root {
   --background-color: #000;
   --main-color: #a9b7c6; /* #cfcfcf */
+  --caret-color: var(--main-color);
+  --selection-color: color-mix(in srgb, var(--background-color) 70%, var(--main-color));
   --heading-color: #77B767; /* #8997a6 */
   --label-color: #fff;
   --op-color: #ffc66d;
@@ -105,10 +107,23 @@ body,
   outline: none;
   padding: var(--text-padding);
   line-height: calc(1em + var(--error-underline-height));
+  caret-color: var(--caret-color);
+}
+
+.node-editor *::selection {
+  background-color: var(--selection-color);
 }
 
 .code-error {
-  text-decoration: underline var(--error-underline-height) var(--error-underline-color);
+  position: relative;
+}
+
+.code-error::before {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0 0 -1px;
+  border-bottom: var(--error-underline-height) solid var(--error-underline-color);
 }
 
 .code-op {

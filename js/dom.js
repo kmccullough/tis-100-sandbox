@@ -52,7 +52,9 @@ const BLOCK_DISPLAYS = [ 'block', 'list-item' ];
  * @return {{ text: string, selectionStart: number|null, selectionEnd: number|null }}
  */
 export function getTextAndSelection(el) {
-  let { endContainer, endOffset, startContainer, startOffset } = getSelection().getRangeAt(0);
+  const selection = getSelection();
+  const range = selection.rangeCount ? getSelection().getRangeAt(0) : {};
+  let { endContainer, endOffset, startContainer, startOffset } = range;
   let result = { text: '', selectionStart: null, selectionEnd: null };
   let texts = [];
 
