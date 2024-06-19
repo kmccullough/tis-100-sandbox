@@ -19,7 +19,7 @@ const wrapComment = code => wrap(code, 'comment');
 
 const matchInstruction = /^(\s*)(?:([a-z][a-z0-9]*):)?(\s*)([a-z0-9]+)([^a-z0-9].*)?$/i;
 const matchOperands = /(\s+|\s*,\s*)([a-z0-9]+)/gi;
-const matchComment = /^(.*)(#.*)?$/;
+const matchComment = /^([^#]*[^#\s])?(\s*#.*)?$/;
 const matchVar = /[a-z_][a-z0-9_]+/i;
 
 const SELECTION_KEYS = [
@@ -128,7 +128,7 @@ export class CodeInstructionsRenderer {
 
     match = rest.match(matchComment);
     let comment;
-    [ rest = '', comment = '' ] = match;
+    [ , rest = '', comment = '' ] = match;
 
     const operands = [ ...rest.matchAll(matchOperands) ];
 
@@ -145,6 +145,13 @@ export class CodeInstructionsRenderer {
       }
       node.append(delEl, operandEl);
       ++operandIndex;
+    }
+
+    if (comment) {
+      const commentEl = wrapComment(comment);
+      setSelection(index, comment.length, commentEl.firstChild);
+      index += comment.length;
+      node.append(commentEl);
     }
 
     // Error on full line

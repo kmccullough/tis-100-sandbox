@@ -9,7 +9,7 @@ const codeInstructionsRenderer = new CodeInstructionsRenderer(renderState);
 const codeNodeRenderer = new CodeNodeRenderer(renderState,  codeInstructionsRenderer);
 
 addEventListener('DOMContentLoaded', () => {
-  const instructions = new CodeInstructions('MOV UP DOWN1\nLABEL:MOV DOWN UP');
+  const instructions = new CodeInstructions('MOV UP DOWN1 # COMMENT\nLABEL: MOV 123 ACC');
   const codeNode = new CodeNode(codeNodeRenderer)
     .setPosition({ x: 0, y: 0 })
     .setValue('code', instructions)
