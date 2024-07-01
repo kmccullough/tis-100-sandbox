@@ -19,7 +19,7 @@ const wrapComment = code => wrap(code, 'comment');
 
 const matchInstruction = /^(\s*)(?:([a-z][a-z0-9]*):)?(\s*)([a-z0-9]+)([^a-z0-9].*)?$/i;
 const matchOperands = /(\s+|\s*,\s*)([a-z0-9]+)/gi;
-const matchComment = /^([^#]*[^#\s])?(\s*#.*)?$/;
+const matchComment = /^([^#]*)?(\s*#.*)?$/;
 const matchVar = /[a-z_][a-z0-9_]+/i;
 
 const SELECTION_KEYS = [

@@ -1,10 +1,10 @@
 import { createElement } from './dom.js';
 
 const formatNoop = () => {};
-const formatCode = (el, codeInstructionsRenderer) => codeAst => {
+const formatCode = (el, codeInstructionsRenderer) => codeInstructions => {
   let {
     nodes, startContainer, startOffset, endContainer, endOffset
-  } = codeInstructionsRenderer.render(codeAst);
+  } = codeInstructionsRenderer.render(codeInstructions);
 
   for (const node of Array.from(el.childNodes)) {
     node.remove();
@@ -59,16 +59,65 @@ export class CodeNodeRenderer {
         spellcheck: false,
       },
     });
+    const input = createElement('input', {
+      class: 'node-input',
+      append: editor,
+    });
+    input.addEventListener('compositionstart', e => {
+      console.log('input compositionstart');
+    });
+    input.addEventListener('compositionupdate', e => {
+      console.log('input compositionupdate');
+    });
+    input.addEventListener('compositionend', e => {
+      console.log('input compositionend');
+      input.remove();
+      code.focus();
+    });
     const code = createElement({
       class: 'node-code',
       append: editor,
     });
-    code.addEventListener('cut', e => codeNode?.onCut?.(e));
-    code.addEventListener('paste', e => codeNode?.onPaste?.(e));
+    code.addEventListener('cut', e => {
+      e.preventDefault();
+      codeNode?.onCut?.(e);
+      document.getSelection()?.deleteFromDocument();
+    });
+    code.addEventListener('paste', e => {
+      e.preventDefault();
+      codeNode?.onPaste?.(e);
+    });
+    code.addEventListener('drop', e => {
+      e.preventDefault();
+      codeNode?.onDrop?.(e);
+    });
     code.addEventListener('keydown', e => codeNode?.onKeyDown?.(e));
     code.addEventListener('keypress', e => codeNode?.onKeyPress?.(e));
     code.addEventListener('keyup', e => codeNode?.onKeyUp?.(e));
-    code.addEventListener('input', e => codeNode?.onInput?.(e));
+    code.addEventListener('compositionstart', e => {
+      console.log('compositionstart');
+      node.append(input);
+      input.focus();
+      codeNode?.onCompositionStart?.(e);
+    });
+    code.addEventListener('compositionupdate', e => codeNode?.onCompositionUpdate?.(e));
+    code.addEventListener('compositionend', e => {
+      console.log('compositionend');
+      input.remove();
+      code.focus();
+      codeNode?.onCompositionEnd?.(e);
+    });
+    code.addEventListener('beforeinput', e => {
+      e.preventDefault();
+      codeNode?.onBeforeInput?.(e);
+    });
+    code.addEventListener('input', e => {
+      if (e.isComposing) {
+        return;
+      }
+      e.preventDefault();
+      codeNode?.onInput?.(e);
+    });
     const acc = createElement({
       class: 'node-value',
       innerText: '0',
