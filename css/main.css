@@ -19,7 +19,7 @@ body {
 }
 
 body,
-.node-editor {
+.node-code {
   background-color: var(--background-color);
   color: var(--main-color);
   font-family: "Consolas", "Courier New", monospace;
@@ -100,17 +100,12 @@ body,
   color: var(--heading-color);
 }
 
-.node-editor {
-  resize: none;
-  position: absolute;
-  inset: 0;
-  outline: none;
-  padding: var(--text-padding);
+.node-code {
   line-height: calc(1em + var(--error-underline-height));
   caret-color: var(--caret-color);
 }
 
-.node-editor *::selection {
+.node-code *::selection {
   background-color: var(--selection-color);
 }
 

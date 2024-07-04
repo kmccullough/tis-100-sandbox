@@ -1,11 +1,19 @@
+import { CodeMirror, CodeMirrorJavaScript, CodeMirrorState } from '../dist/vendor.js';
+const { EditorView, basicSetup } = CodeMirror;
+const { EditorState } = CodeMirrorState;
+const { javascript } = CodeMirrorJavaScript;
+
 import { createElement } from './dom.js';
+
+const MAX_CODE_LINES = 15;
+const MAX_CODE_LINE = 18;
 
 const formatNoop = () => {};
 const formatCode = (el, codeInstructionsRenderer) => codeInstructions => {
   let {
     nodes, startContainer, startOffset, endContainer, endOffset
   } = codeInstructionsRenderer.render(codeInstructions);
-
+return;
   for (const node of Array.from(el.childNodes)) {
     node.remove();
   }
@@ -50,34 +58,23 @@ export class CodeNodeRenderer {
     if (codeNode.elements) {
       return;
     }
-    const editor = createElement({
-      class: 'node-editor',
-      attributes: {
-        contenteditable: true,
-        autocomplete: 'off',
-        autocapitalize: 'off',
-        spellcheck: false,
-      },
-    });
-    const input = createElement('input', {
-      class: 'node-input',
-      append: editor,
-    });
-    input.addEventListener('compositionstart', e => {
-      console.log('input compositionstart');
-    });
-    input.addEventListener('compositionupdate', e => {
-      console.log('input compositionupdate');
-    });
-    input.addEventListener('compositionend', e => {
-      console.log('input compositionend');
-      input.remove();
-      code.focus();
-    });
     const code = createElement({
       class: 'node-code',
-      append: editor,
     });
+    const tis100 = EditorState.changeFilter.of(tr => {
+      return !(tr.docChanged && (
+        tr.newDoc.lines > MAX_CODE_LINES
+        || tr.newDoc.text.some(t => t.length > MAX_CODE_LINE)
+      ))
+    });
+    const startState = EditorState.create({
+      doc: 'Hello World',
+      extensions: [ tis100, basicSetup, javascript() ],
+    })
+    let view = new EditorView({
+      state: startState,
+      parent: code
+    })
     code.addEventListener('cut', e => {
       e.preventDefault();
       codeNode?.onCut?.(e);
@@ -88,27 +85,12 @@ export class CodeNodeRenderer {
       codeNode?.onPaste?.(e);
     });
     code.addEventListener('drop', e => {
-      e.preventDefault();
       codeNode?.onDrop?.(e);
     });
     code.addEventListener('keydown', e => codeNode?.onKeyDown?.(e));
     code.addEventListener('keypress', e => codeNode?.onKeyPress?.(e));
     code.addEventListener('keyup', e => codeNode?.onKeyUp?.(e));
-    code.addEventListener('compositionstart', e => {
-      console.log('compositionstart');
-      node.append(input);
-      input.focus();
-      codeNode?.onCompositionStart?.(e);
-    });
-    code.addEventListener('compositionupdate', e => codeNode?.onCompositionUpdate?.(e));
-    code.addEventListener('compositionend', e => {
-      console.log('compositionend');
-      input.remove();
-      code.focus();
-      codeNode?.onCompositionEnd?.(e);
-    });
     code.addEventListener('beforeinput', e => {
-      e.preventDefault();
       codeNode?.onBeforeInput?.(e);
     });
     code.addEventListener('input', e => {
@@ -170,9 +152,9 @@ export class CodeNodeRenderer {
     codeNode.elements = {
       node:   { element: node,   setValue: formatNoop         },
       code:   {
-        element: editor,
-        getValue: getCodeFromFormatted(editor, this.codeInstructionsRenderer),
-        setValue: formatCode(editor, this.codeInstructionsRenderer),
+        element: code,
+        getValue: getCodeFromFormatted(code, this.codeInstructionsRenderer),
+        setValue: formatCode(code, this.codeInstructionsRenderer),
       },
       acc:    { element: acc,    setValue: formatNumber(acc)  },
       bak:    { element: bak,    setValue: formatBak(bak)     },

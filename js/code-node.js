@@ -152,18 +152,6 @@ export class CodeNode {
     // this.rerenderLater();
   }
 
-  onCompositionStart(e) {
-    console.log('onCompositionStart', e);
-  }
-
-  onCompositionUpdate(e) {
-    console.log('onCompositionStart', e);
-  }
-
-  onCompositionEnd(e) {
-    console.log('onCompositionStart', e);
-  }
-
   onInput(e) {
     console.log('input');
     if (e.inputType === 'insertParagraph') {

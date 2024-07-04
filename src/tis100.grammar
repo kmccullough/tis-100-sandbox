@@ -1,0 +1,41 @@
+@top TIS100Program { expression* }
+
+@skip { space | Comment }
+@skip {} {
+  String {
+    stringOpen (stringEscape | stringContent)* stringClose
+  }
+}
+
+TIS100Instruction {
+  'MOV'
+  | 'SWP'
+  | 'SAV'
+  | 'ADD'
+  | 'SUB'
+  | 'NEG'
+  | 'JMP'
+  | 'JEZ'
+  | 'JNZ'
+  | 'JGZ'
+  | 'JLZ'
+  | 'JRO'
+  | 'ACC'
+  | 'NIL'
+  | 'LEFT'
+  | 'RIGHT'
+  | 'UP'
+  | 'DOWN'
+  | Number
+}
+
+expression { Name | Number | BinaryExpression }
+
+BinaryExpression { "(" expression ("+" | "-") expression ")" }
+
+@tokens {
+  Name { @asciiLetter+ }
+  Number { @digit+ }
+  space { @whitespace+ }
+  Comment { "#" ![\n]* }
+}
